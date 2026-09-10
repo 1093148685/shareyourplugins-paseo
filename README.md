@@ -1,2 +1,43 @@
 # shareyourplugins-paseo
-Paseo plugins community repo
+
+Paseo 插件分享仓库 —— 一个目录一个插件，持续更新。
+
+## 插件列表
+
+| 插件 | 说明 | 文档 |
+|---|---|---|
+| [preset-switcher](plugins/preset-switcher/) | 一键以指定**人格 + 技能 + 模型**启动 agent；预设即数据（扫描即注册），zip 预设包可导入导出，支持 claude / pi / codex / opencode 多 CLI 适配 | [README](plugins/preset-switcher/README.md) |
+
+## 安装
+
+通过 Paseo 的 git 安装源，用 `:路径` 指定子目录：
+
+```bash
+paseo plugin install github.com/1093148685/shareyourplugins-paseo:plugins/preset-switcher
+```
+
+或手动：把 `plugins/<插件名>/` 整个目录拷到 Paseo 插件目录，然后在面板里启用。
+
+## 目录约定
+
+```
+plugins/
+└── <plugin-name>/
+    ├── paseo-plugin.json   # 插件清单（必需）
+    ├── package.json
+    ├── index.ts            # daemon 端入口
+    ├── main.client.tsx     # 面板 UI（如有）
+    └── README.md           # 插件自己的说明书
+```
+
+## 贡献 / 分享自己的插件
+
+1. Fork 本仓库
+2. 在 `plugins/` 下新建你的插件目录（带上 `paseo-plugin.json` 和 README）
+3. 提 PR
+
+插件里**不要**提交 `node_modules/`、个人密钥、服务器地址等敏感信息（`.gitignore` 已挡掉常见情况，提交前请自查）。
+
+## License
+
+MIT

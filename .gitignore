@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+Thumbs.db
+
+# 本地密钥 / 凭证，绝不入库
+*.pem
+*.ppk
+.env
+.env.*
+credentials.json
