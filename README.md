@@ -7,6 +7,7 @@ Paseo 插件分享仓库 —— 一个目录一个插件，持续更新。
 | 插件 | 说明 | 文档 |
 |---|---|---|
 | [preset-switcher](plugins/preset-switcher/) | 一键以指定**人格 + 技能 + 模型**启动 agent；预设即数据（扫描即注册），zip 预设包可导入导出，支持 claude / pi / codex / opencode 多 CLI 适配 | [README](plugins/preset-switcher/README.md) |
+| [server-monitor](plugins/server-monitor/) | 多 VPS 监控面板（CPU/内存/磁盘/网络，SSH 采集）；密码 AES-256-GCM 本地加密；附带 `manage.mjs` CLI，AI 助手可一行命令添加/导入服务器 | [README](plugins/server-monitor/README.md) · [AI-GUIDE](plugins/server-monitor/AI-GUIDE.md) |
 
 ## 安装
 

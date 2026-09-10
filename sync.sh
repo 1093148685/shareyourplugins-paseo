@@ -10,7 +10,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKPLACE="$(dirname "$REPO_DIR")"
 
 # 仓库里的插件 -> workplace 里的开发目录（一般同名）
-SYNC_LIST=(preset-switcher)
+SYNC_LIST=(preset-switcher server-monitor)
 
 sync_one() {
   local name="$1"
@@ -22,7 +22,7 @@ sync_one() {
   fi
   mkdir -p "$dst"
   # --delete 让仓库目录与开发目录严格一致（开发目录里删掉的文件也同步删除）
-  tar --exclude=node_modules --exclude=.git -cf - -C "$src" . | tar -xf - -C "$dst"
+  tar --exclude=node_modules --exclude=.git --exclude='*.tmp' -cf - -C "$src" . | tar -xf - -C "$dst"
   echo "✅ $name 已同步 -> plugins/$name"
 }
 
