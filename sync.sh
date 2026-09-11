@@ -10,7 +10,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORKPLACE="$(dirname "$REPO_DIR")"
 
 # 仓库里的插件 -> workplace 里的开发目录（一般同名）
-SYNC_LIST=(preset-switcher server-monitor)
+SYNC_LIST=(preset-switcher server-monitor provider-switcher)
 
 sync_one() {
   local name="$1"
