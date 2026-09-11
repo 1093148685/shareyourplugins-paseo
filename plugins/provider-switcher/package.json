@@ -1,7 +1,7 @@
 {
   "name": "provider-switcher",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Paseo 插件：在侧边栏直接管理 Claude Code / Pi / Paseo 的 API 提供商，无需打开 cc-switch。预设一键添加、模型拉取、端点测速、拖拽排序、Pi 累加模式单活跃语义。",
   "license": "MIT",
   "keywords": ["paseo", "plugin", "providers", "claude-code", "pi", "cc-switch", "api"],
