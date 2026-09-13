@@ -21,7 +21,9 @@ sync_one() {
     return 1
   fi
   mkdir -p "$dst"
-  # --delete 让仓库目录与开发目录严格一致（开发目录里删掉的文件也同步删除）
+  # 先清空目标目录再解包，让仓库目录与开发目录严格一致
+  # （开发目录里删掉的文件也同步删除；tar 覆盖模式不会删旧文件）
+  find "$dst" -mindepth 1 -delete
   tar --exclude=node_modules --exclude=.git --exclude='*.tmp' -cf - -C "$src" . | tar -xf - -C "$dst"
   echo "✅ $name 已同步 -> plugins/$name"
 }

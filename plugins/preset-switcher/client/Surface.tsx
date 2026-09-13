@@ -1,5 +1,5 @@
-import type { PluginSurfaceProps } from "@getpaseo/plugin";
-import { useRpc } from "@getpaseo/plugin";
+import type { PluginSurfaceProps } from "@getpaseo/plugin/client";
+import { useRpc } from "@getpaseo/plugin/client";
 import React, { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +11,7 @@ import {
   previewPreset,
   removePreset,
   repairPreset,
-} from "./contracts";
+} from "../shared/contracts";
 
 // Contracts live in ./contracts (node-free) and are shared with the backend
 // entry, so input/output shapes can never drift between the two sides.

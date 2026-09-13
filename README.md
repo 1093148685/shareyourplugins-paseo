@@ -6,8 +6,8 @@ Paseo 插件分享仓库 —— 一个目录一个插件，持续更新。
 
 | 插件 | 说明 | 文档 |
 |---|---|---|
-| [preset-switcher](plugins/preset-switcher/) | 一键以指定**人格 + 技能 + 模型**启动 agent；预设即数据（扫描即注册），zip 预设包可导入导出，支持 claude / pi / codex / opencode 多 CLI 适配 | [README](plugins/preset-switcher/README.md) |
-| [server-monitor](plugins/server-monitor/) | 多 VPS 监控面板（CPU/内存/磁盘/网络，SSH 采集）；密码 AES-256-GCM 本地加密；附带 `manage.mjs` CLI，AI 助手可一行命令添加/导入服务器 | [README](plugins/server-monitor/README.md) · [AI-GUIDE](plugins/server-monitor/AI-GUIDE.md) |
+| [preset-switcher](plugins/preset-switcher/) | 一键以指定**人格 + 技能 + 模型**启动 agent；预设即数据（扫描即注册），zip 预设包可导入导出，支持 claude / pi / codex / opencode 多 CLI 适配（要求 Paseo >= 0.8.0） | [README](plugins/preset-switcher/README.md) |
+| [server-monitor](plugins/server-monitor/) | 多 VPS 监控面板（CPU/内存/磁盘/网络，SSH 采集）；密码 AES-256-GCM 本地加密；附带 `manage.mjs` CLI，AI 助手可一行命令添加/导入服务器（要求 Paseo >= 0.8.0） | [README](plugins/server-monitor/README.md) · [AI-GUIDE](plugins/server-monitor/AI-GUIDE.md) |
 | [provider-switcher](plugins/provider-switcher/) | 在 Paseo 侧边栏直接切换 **Claude Code / Pi / Paseo** 的 API 提供商，不用再打开 cc-switch；16+7 个预设、模型拉取、端点测速、原子写 + 自动备份（要求 Paseo >= 0.8.0） | [README](plugins/provider-switcher/README.md) |
 
 ## 安装
@@ -22,19 +22,7 @@ paseo plugin install github.com/1093148685/shareyourplugins-paseo:plugins/preset
 
 ## 目录约定
 
-Paseo 0.7 插件（preset-switcher / server-monitor）：
-
-```
-plugins/
-└── <plugin-name>/
-    ├── paseo-plugin.json   # 插件清单（必需）
-    ├── package.json
-    ├── index.ts            # daemon 端入口
-    ├── main.client.tsx     # 面板 UI（如有）
-    └── README.md           # 插件自己的说明书
-```
-
-Paseo 0.8 插件（provider-switcher）—— 新架构拆 client/server/shared 三目录：
+全部插件均为 Paseo 0.8 架构 —— 拆 client/server/shared 三目录：
 
 ```
 plugins/

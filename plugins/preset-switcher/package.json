@@ -1,13 +1,17 @@
 {
   "name": "preset-switcher",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.2.0",
+  "description": "Paseo 插件：一键以指定人格 + 技能 + 模型启动 agent；预设即数据（扫描即注册），zip 预设包可导入导出，支持 claude / pi / codex / opencode 多 CLI 适配。要求 Paseo >= 0.8.0。",
+  "license": "MIT",
+  "keywords": ["paseo", "plugin", "preset", "persona", "skills", "agent", "claude", "pi", "codex"],
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@getpaseo/plugin": "0.7.2",
+    "@getpaseo/plugin": "0.8.0",
     "@tanstack/react-query": "^5.90.11",
+    "@types/node": "^22.0.0",
     "@types/react": "~19.2.0",
     "react": "19.1.0",
     "react-native": "0.81.5",

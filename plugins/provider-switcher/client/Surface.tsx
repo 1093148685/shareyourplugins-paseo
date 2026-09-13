@@ -115,6 +115,8 @@ interface CardProps {
   appId: AppId;
   p: Palette;
   compact: boolean;
+  /** 触屏端（iOS/Android）：无 hover，动作按钮常显 + 更大触控目标 */
+  touch: boolean;
   sorting: boolean;
   isDragOver: boolean;
   onSwitch: () => void;
@@ -134,7 +136,7 @@ interface CardProps {
 }
 
 function ProviderCard(p: CardProps) {
-  const { provider, appId, p: c, compact, sorting, isDragOver, fetchingModels, fetchedModels, testResults, testingEndpoints } = p;
+  const { provider, appId, p: c, compact, touch, sorting, isDragOver, fetchingModels, fetchedModels, testResults, testingEndpoints } = p;
   const isPi = appId === "pi";
   const isCurrent = provider.isCurrent;
   const inConfig = provider.inConfig ?? false;
@@ -270,8 +272,8 @@ function ProviderCard(p: CardProps) {
           )}
         </View>
 
-        {/* Actions */}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 4, opacity: hovered || sorting || confirmDelete ? 1 : 0.7 }}>
+        {/* Actions — 触屏端无 hover，常显；compact 纵向布局时右对齐 */}
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: compact ? "flex-end" : "flex-start", gap: 4, opacity: touch || hovered || sorting || confirmDelete ? 1 : 0.7 }}>
           {confirmDelete ? (
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
               <Text style={{ fontSize: 12, fontWeight: "600", color: c.danger }}>确认删除?</Text>
@@ -297,8 +299,8 @@ function ProviderCard(p: CardProps) {
             </View>
           ) : sorting ? (
             <>
-              <IconBtn onPress={p.onMoveUp ?? (() => {})} color={c.text} p={c}><Icon name="ChevronUp" size={16} color={c.text} /></IconBtn>
-              <IconBtn onPress={p.onMoveDown ?? (() => {})} color={c.text} p={c}><Icon name="ChevronDown" size={16} color={c.text} /></IconBtn>
+              <IconBtn onPress={p.onMoveUp ?? (() => {})} color={c.text} p={c} touch={touch}><Icon name="ChevronUp" size={16} color={c.text} /></IconBtn>
+              <IconBtn onPress={p.onMoveDown ?? (() => {})} color={c.text} p={c} touch={touch}><Icon name="ChevronDown" size={16} color={c.text} /></IconBtn>
             </>
           ) : (
             <>
@@ -306,7 +308,7 @@ function ProviderCard(p: CardProps) {
                 onPress={mainBtn.onPress}
                 disabled={mainBtn.disabled}
                 style={({ pressed }) => ({
-                  borderRadius: 8, paddingHorizontal: 11, paddingVertical: 6,
+                  borderRadius: 8, paddingHorizontal: touch ? 14 : 11, paddingVertical: touch ? 10 : 6,
                   backgroundColor: mainBtn.bg, opacity: pressed ? 0.8 : 1,
                   flexDirection: "row", alignItems: "center", gap: 4,
                 })}
@@ -314,11 +316,11 @@ function ProviderCard(p: CardProps) {
                 <Icon name={mainBtn.icon} size={12} color={mainBtn.color} />
                 <Text style={{ color: mainBtn.color, fontSize: 12, fontWeight: "600" }}>{mainBtn.label}</Text>
               </Pressable>
-              <IconBtn onPress={p.onEdit} color={c.muted} p={c}><Icon name="Pencil" size={14} color={c.muted} /></IconBtn>
-              <IconBtn onPress={p.onTest} color={testingEndpoints ? c.accent : c.muted} p={c} disabled={testingEndpoints}>
+              <IconBtn onPress={p.onEdit} color={c.muted} p={c} touch={touch}><Icon name="Pencil" size={14} color={c.muted} /></IconBtn>
+              <IconBtn onPress={p.onTest} color={testingEndpoints ? c.accent : c.muted} p={c} touch={touch} disabled={testingEndpoints}>
                 {testingEndpoints ? <Spinner size={12} color={c.accent} /> : <Icon name="Zap" size={14} color={c.muted} />}
               </IconBtn>
-              <IconBtn onPress={p.onFetchModels} color={fetchingModels ? c.accent : c.muted} p={c} disabled={fetchingModels}>
+              <IconBtn onPress={p.onFetchModels} color={fetchingModels ? c.accent : c.muted} p={c} touch={touch} disabled={fetchingModels}>
                 {fetchingModels ? <Spinner size={12} color={c.accent} /> : <Icon name="Download" size={14} color={c.muted} />}
               </IconBtn>
               {isPi && (
@@ -326,7 +328,7 @@ function ProviderCard(p: CardProps) {
                   onPress={inConfig ? p.onPiDisable : () => {}}
                   disabled={!inConfig}
                   style={({ pressed }) => ({
-                    borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6,
+                    borderRadius: 8, paddingHorizontal: touch ? 14 : 10, paddingVertical: touch ? 10 : 6,
                     backgroundColor: pressed ? c.surface2 : "transparent",
                     borderWidth: 1, borderColor: c.border,
                     opacity: inConfig ? 1 : 0.4,
@@ -335,7 +337,7 @@ function ProviderCard(p: CardProps) {
                   <Text style={{ fontSize: 12, fontWeight: "600", color: c.muted }}>移除</Text>
                 </Pressable>
               )}
-              <IconBtn onPress={isCurrent ? () => {} : () => setConfirmDelete(true)} color={isCurrent ? c.surface2 : c.danger} p={c} disabled={isCurrent}>
+              <IconBtn onPress={isCurrent ? () => {} : () => setConfirmDelete(true)} color={isCurrent ? c.surface2 : c.danger} p={c} touch={touch} disabled={isCurrent}>
                 <Icon name="Trash2" size={14} color={isCurrent ? c.surface2 : c.danger} />
               </IconBtn>
             </>
@@ -347,7 +349,7 @@ function ProviderCard(p: CardProps) {
   );
 }
 
-function IconBtn({ onPress, color, disabled, children, p }: { onPress: () => void; color: string; disabled?: boolean; children: React.ReactNode; p: Palette }) {
+function IconBtn({ onPress, color, disabled, children, p, touch = false }: { onPress: () => void; color: string; disabled?: boolean; children: React.ReactNode; p: Palette; touch?: boolean }) {
   const [pressed, setPressed] = useState(false);
   const [hovered, setHovered] = useState(false);
   return (
@@ -359,7 +361,7 @@ function IconBtn({ onPress, color, disabled, children, p }: { onPress: () => voi
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
       style={{
-        width: 29, height: 29, borderRadius: 7, alignItems: "center", justifyContent: "center",
+        width: touch ? 40 : 29, height: touch ? 40 : 29, borderRadius: 7, alignItems: "center", justifyContent: "center",
         backgroundColor: pressed ? p.surface2 : hovered ? p.surface1 : "transparent",
         opacity: disabled ? 0.4 : 1,
         transform: pressed ? [{ scale: 0.9 }] : [{ scale: 1 }],
@@ -374,7 +376,7 @@ function IconBtn({ onPress, color, disabled, children, p }: { onPress: () => voi
 
 function FocusInput({
   c, value, onChangeText, placeholder, secureTextEntry, autoCapitalize,
-  style, onSubmitEditing,
+  style, onSubmitEditing, touch = false,
 }: {
   c: Palette;
   value: string;
@@ -384,6 +386,7 @@ function FocusInput({
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   style?: any;
   onSubmitEditing?: () => void;
+  touch?: boolean;
 }) {
   const [focused, setFocused] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -407,7 +410,7 @@ function FocusInput({
       onBlur={() => setFocused(false)}
       onSubmitEditing={onSubmitEditing}
       style={[{
-        paddingHorizontal: 10, paddingVertical: 7, fontSize: 13,
+        paddingHorizontal: 10, paddingVertical: touch ? 11 : 7, fontSize: 13,
         borderWidth: 1,
         borderRadius: 8,
         borderColor: focused ? c.accent : hovered ? c.muted : c.border,
@@ -419,7 +422,7 @@ function FocusInput({
 
 // ── Model field with dropdown ──────────────────────────────────────────────────
 
-function ModelField({ value, onChange, placeholder, models, c }: { value: string; onChange: (v: string) => void; placeholder?: string; models: FetchedModel[]; c: Palette }) {
+function ModelField({ value, onChange, placeholder, models, c, touch = false }: { value: string; onChange: (v: string) => void; placeholder?: string; models: FetchedModel[]; c: Palette; touch?: boolean }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => models.filter((m) => !query || m.id.toLowerCase().includes(query.toLowerCase())), [models, query]);
@@ -427,6 +430,7 @@ function ModelField({ value, onChange, placeholder, models, c }: { value: string
     <View style={{ flexDirection: "row", gap: 6 }}>
       <FocusInput
         c={c}
+        touch={touch}
         value={value}
         onChangeText={onChange}
         placeholder={placeholder}
@@ -438,7 +442,7 @@ function ModelField({ value, onChange, placeholder, models, c }: { value: string
           <Pressable
             onPress={() => setOpen(true)}
             style={({ pressed }) => ({
-              paddingHorizontal: 8, paddingVertical: 6, borderRadius: 8,
+              paddingHorizontal: touch ? 12 : 8, paddingVertical: touch ? 11 : 6, borderRadius: 8,
               borderWidth: 1, borderColor: c.border,
               backgroundColor: pressed ? c.surface2 : c.surface1, alignItems: "center", justifyContent: "center",
             })}
@@ -447,10 +451,11 @@ function ModelField({ value, onChange, placeholder, models, c }: { value: string
           </Pressable>
           <RNModal visible={open} transparent animationType="fade" onRequestClose={() => {}}>{/* ESC 置空：避免输入法取消拼写误关 */}
             <Pressable onPress={() => setOpen(false)} style={{ flex: 1, backgroundColor: c.backdrop, alignItems: "center", justifyContent: "center", padding: 20 }}>
-              <Pressable onPress={() => {}} style={{ width: 280, maxHeight: 360, borderRadius: 10, backgroundColor: c.surface0, borderWidth: 1, borderColor: c.border, overflow: "hidden" }}>
+              <Pressable onPress={() => {}} style={{ width: touch ? ("92%" as const) : 280, maxWidth: 420, maxHeight: 360, borderRadius: 10, backgroundColor: c.surface0, borderWidth: 1, borderColor: c.border, overflow: "hidden" }}>
                 <View style={{ padding: 8, borderBottomWidth: 1, borderColor: c.border }}>
                   <FocusInput
                     c={c}
+                    touch={touch}
                     value={query}
                     onChangeText={setQuery}
                     placeholder="搜索模型…"
@@ -486,12 +491,14 @@ function ModelField({ value, onChange, placeholder, models, c }: { value: string
 interface AddPanelProps {
   appId: AppId;
   c: Palette;
+  /** 移动端/窄面板：弹窗全屏、字段堆叠、触控目标放大 */
+  mobile: boolean;
   editing?: ProviderWithStatus | null;
   onClose: () => void;
   onSaved: () => void;
 }
 
-function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps) {
+function AddProviderPanel({ appId, c, mobile, editing, onClose, onSaved }: AddPanelProps) {
   const addRpc = useRpc(addProvider);
   const editRpc = useRpc(editProvider);
   const fetchModelsRpc = useRpc(fetchModels);
@@ -642,19 +649,19 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
     // 1. 背景层是 View 而非 Pressable —— 鼠标移出/点击背景不再关闭弹窗
     // 2. onRequestClose 置空 —— 中文输入法里 ESC 取消拼写会触发它，导致编辑中弹窗消失
     <RNModal visible transparent animationType="fade" onRequestClose={() => {}}>
-      <View style={{ flex: 1, backgroundColor: c.backdrop, alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <View style={{ flex: 1, backgroundColor: c.backdrop, alignItems: "center", justifyContent: "center", padding: mobile ? 0 : 16 }}>
         <View
-          style={{ width: "100%", maxWidth: 720, maxHeight: "90%", borderRadius: 14, backgroundColor: c.surface0, borderWidth: 1, borderColor: c.border, overflow: "hidden" }}
+          style={{ width: "100%", maxWidth: mobile ? ("100%" as const) : 720, maxHeight: mobile ? "100%" : "90%", borderRadius: mobile ? 0 : 14, backgroundColor: c.surface0, borderWidth: mobile ? 0 : 1, borderColor: c.border, overflow: "hidden", ...(mobile ? { flex: 1 } : {}) }}
         >
           {/* Header */}
           <View style={{ flexDirection: "row", alignItems: "center", padding: 14, borderBottomWidth: 1, borderColor: c.border, gap: 14 }}>
-            <Pressable onPress={onClose} style={({ pressed }) => ({ width: 34, height: 34, borderRadius: 10, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface0, alignItems: "center", justifyContent: "center" })}>
+            <Pressable onPress={onClose} style={({ pressed }) => ({ width: mobile ? 42 : 34, height: mobile ? 42 : 34, borderRadius: 10, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface0, alignItems: "center", justifyContent: "center" })}>
               <Icon name="ArrowLeft" size={16} color={c.text} />
             </Pressable>
             <Text style={{ fontSize: 17, fontWeight: "700", color: c.text }}>
               {isEdit ? "编辑供应商" : "添加供应商"} — {appId === "claude" ? "Claude Code" : appId === "pi" ? "Pi" : "Paseo"}
             </Text>
-            <Pressable onPress={onClose} style={({ pressed }) => ({ marginLeft: "auto", width: 30, height: 30, borderRadius: 7, alignItems: "center", justifyContent: "center", backgroundColor: pressed ? c.surface2 : "transparent" })}>
+            <Pressable onPress={onClose} style={({ pressed }) => ({ marginLeft: "auto", width: mobile ? 40 : 30, height: mobile ? 40 : 30, borderRadius: 7, alignItems: "center", justifyContent: "center", backgroundColor: pressed ? c.surface2 : "transparent" })}>
               <Icon name="X" size={16} color={c.muted} />
             </Pressable>
           </View>
@@ -666,27 +673,28 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
               <View style={{ marginBottom: 20 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <Text style={{ fontSize: 13, fontWeight: "600", color: c.muted }}>选择预设</Text>
-                  <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
+                  <View style={{ flexDirection: "row", gap: 6, alignItems: "center", flex: mobile && searchOpen ? 1 : 0 }}>
                     {searchOpen && (
                       <FocusInput
                         c={c}
+                        touch={mobile}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                         placeholder="搜索预设…"
                         autoCapitalize="none"
-                        style={{ width: 180, paddingHorizontal: 8, paddingVertical: 4, fontSize: 12 }}
+                        style={{ width: mobile ? undefined : 180, flex: mobile ? 1 : 0, paddingHorizontal: 8, paddingVertical: 4, fontSize: 12 }}
                       />
                     )}
-                    <Pressable onPress={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }} style={({ pressed }) => ({ width: 29, height: 29, borderRadius: 7, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : "transparent" })}>
+                    <Pressable onPress={() => { setSearchOpen(!searchOpen); setSearchQuery(""); }} style={({ pressed }) => ({ width: mobile ? 40 : 29, height: mobile ? 40 : 29, borderRadius: 7, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : "transparent" })}>
                       <Icon name="Search" size={14} color={searchOpen ? c.accent : c.muted} />
                     </Pressable>
-                    <Pressable onPress={() => setSortAZ(!sortAZ)} style={({ pressed }) => ({ width: 29, height: 29, borderRadius: 7, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : "transparent" })}>
+                    <Pressable onPress={() => setSortAZ(!sortAZ)} style={({ pressed }) => ({ width: mobile ? 40 : 29, height: mobile ? 40 : 29, borderRadius: 7, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : "transparent" })}>
                       <Icon name="ArrowDownUp" size={14} color={sortAZ ? c.accent : c.muted} />
                     </Pressable>
                   </View>
                 </View>
                 <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                  <PresetBtn label="自定义配置" selected={selectedPreset === null} onPress={() => setSelectedPreset(null)} c={c} />
+                  <PresetBtn label="自定义配置" selected={selectedPreset === null} onPress={() => setSelectedPreset(null)} c={c} mobile={mobile} />
                   {visiblePresets.map((preset) => {
                     const isSelected = selectedPreset === preset.id;
                     const selBg = (preset as any).theme?.backgroundColor ?? c.accent;
@@ -699,6 +707,7 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                         selectedBg={selBg}
                         onPress={() => setSelectedPreset(isSelected ? null : preset.id)}
                         c={c}
+                        mobile={mobile}
                       />
                     );
                   })}
@@ -710,13 +719,14 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
             {/* Form fields */}
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
               <Field label="名称 *" fullWidth>
-                <FocusInput c={c} value={name} onChangeText={setName} placeholder="供应商名称" />
+                <FocusInput c={c} touch={mobile} value={name} onChangeText={setName} placeholder="供应商名称" />
               </Field>
 
               {isPi && (
                 <Field label="Provider Key *（小写字母/数字/连字符）" fullWidth>
                   <FocusInput
                     c={c}
+                    touch={mobile}
                     value={providerKey}
                     onChangeText={(v) => setProviderKey(v.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                     placeholder="my-provider"
@@ -727,7 +737,7 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
 
               {isPi && (
                 <Field label="接口格式" fullWidth>
-                  <FocusInput c={c} value={apiFormat} onChangeText={setApiFormat} placeholder="openai-completions" />
+                  <FocusInput c={c} touch={mobile} value={apiFormat} onChangeText={setApiFormat} placeholder="openai-completions" />
                 </Field>
               )}
 
@@ -735,6 +745,7 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                 <View style={{ position: "relative" }}>
                   <FocusInput
                     c={c}
+                    touch={mobile}
                     value={apiKey}
                     onChangeText={(v) => { setApiKey(v); if (fetchError) setFetchError(""); }}
                     placeholder="sk-..."
@@ -744,7 +755,7 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                   />
                   <Pressable
                     onPress={() => setShowApiKey(!showApiKey)}
-                    style={({ pressed }) => ({ position: "absolute", right: 5, top: "50%", marginTop: -13, width: 26, height: 26, borderRadius: 6, alignItems: "center", justifyContent: "center", backgroundColor: pressed ? c.surface2 : "transparent" })}
+                    style={({ pressed }) => ({ position: "absolute", right: 5, top: "50%", marginTop: mobile ? -16 : -13, width: mobile ? 32 : 26, height: mobile ? 32 : 26, borderRadius: 6, alignItems: "center", justifyContent: "center", backgroundColor: pressed ? c.surface2 : "transparent" })}
                   >
                     <Icon name={showApiKey ? "EyeOff" : "Eye"} size={14} color={c.muted} />
                   </Pressable>
@@ -755,6 +766,7 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                 <View style={{ flexDirection: "row", gap: 8 }}>
                   <FocusInput
                     c={c}
+                    touch={mobile}
                     value={baseUrl}
                     onChangeText={setBaseUrl}
                     placeholder="https://api.example.com"
@@ -765,7 +777,7 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                     onPress={handleFetchModels}
                     disabled={fetchingModels || !baseUrl}
                     style={({ pressed }) => ({
-                      paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8,
+                      paddingHorizontal: mobile ? 14 : 11, paddingVertical: mobile ? 11 : 6, borderRadius: 8,
                       borderWidth: 1, borderColor: c.border,
                       backgroundColor: pressed ? c.surface2 : c.surface1,
                       flexDirection: "row", alignItems: "center", gap: 4,
@@ -782,11 +794,11 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                 )}
               </Field>
 
-              <Field label="官网地址" half>
-                <FocusInput c={c} value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="https://" />
+              <Field label="官网地址" half mobile={mobile}>
+                <FocusInput c={c} touch={mobile} value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="https://" />
               </Field>
-              <Field label="备注" half>
-                <FocusInput c={c} value={notes} onChangeText={setNotes} placeholder="可选备注" />
+              <Field label="备注" half mobile={mobile}>
+                <FocusInput c={c} touch={mobile} value={notes} onChangeText={setNotes} placeholder="可选备注" />
               </Field>
 
               {!isPi && (
@@ -803,8 +815,8 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                     { label: "Sonnet 模型", value: sonnetModel, setter: setSonnetModel },
                     { label: "Opus 模型", value: opusModel, setter: setOpusModel },
                   ].map(({ label, value, setter }) => (
-                    <Field key={label} label={label} half>
-                      <ModelField value={value} onChange={setter} placeholder="模型 ID" models={modalFetchedModels} c={c} />
+                    <Field key={label} label={label} half mobile={mobile}>
+                      <ModelField value={value} onChange={setter} placeholder="模型 ID" models={modalFetchedModels} c={c} touch={mobile} />
                     </Field>
                   ))}
                 </>
@@ -818,7 +830,7 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                       <Pressable
                         onPress={handleFetchModels}
                         disabled={fetchingModels || !baseUrl}
-                        style={({ pressed }) => ({ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1, flexDirection: "row", alignItems: "center", gap: 4, opacity: fetchingModels ? 0.7 : 1 })}
+                        style={({ pressed }) => ({ paddingHorizontal: mobile ? 12 : 8, paddingVertical: mobile ? 9 : 4, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1, flexDirection: "row", alignItems: "center", gap: 4, opacity: fetchingModels ? 0.7 : 1 })}
                       >
                         {fetchingModels ? <Spinner size={11} /> : <Icon name="Download" size={11} color={c.text} />}
                         <Text style={{ color: c.text, fontSize: 11, fontWeight: "600" }}>获取模型列表</Text>
@@ -827,9 +839,9 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                     {piModels.length === 0 && <Text style={{ fontSize: 12, color: c.muted }}>暂无模型</Text>}
                     {piModels.map((m, idx) => (
                       <View key={idx} style={{ flexDirection: "row", gap: 8, marginBottom: 6, alignItems: "center" }}>
-                        <FocusInput c={c} value={m.id} onChangeText={(v) => setPiModels(piModels.map((x, i) => i === idx ? { ...x, id: v } : x))} placeholder="模型 ID *" autoCapitalize="none" style={{ flex: 1, fontSize: 12 }} />
-                        <FocusInput c={c} value={m.name} onChangeText={(v) => setPiModels(piModels.map((x, i) => i === idx ? { ...x, name: v } : x))} placeholder="显示名称" style={{ flex: 1, fontSize: 12 }} />
-                        <Pressable onPress={() => setPiModels(piModels.filter((_, i) => i !== idx))} style={({ pressed }) => ({ width: 29, height: 29, borderRadius: 7, alignItems: "center", justifyContent: "center", backgroundColor: pressed ? c.surface2 : "transparent" })}>
+                        <FocusInput c={c} touch={mobile} value={m.id} onChangeText={(v) => setPiModels(piModels.map((x, i) => i === idx ? { ...x, id: v } : x))} placeholder="模型 ID *" autoCapitalize="none" style={{ flex: 1, fontSize: 12 }} />
+                        <FocusInput c={c} touch={mobile} value={m.name} onChangeText={(v) => setPiModels(piModels.map((x, i) => i === idx ? { ...x, name: v } : x))} placeholder="显示名称" style={{ flex: 1, fontSize: 12 }} />
+                        <Pressable onPress={() => setPiModels(piModels.filter((_, i) => i !== idx))} style={({ pressed }) => ({ width: mobile ? 40 : 29, height: mobile ? 40 : 29, borderRadius: 7, alignItems: "center", justifyContent: "center", backgroundColor: pressed ? c.surface2 : "transparent" })}>
                           <Icon name="Trash2" size={14} color={c.danger} />
                         </Pressable>
                       </View>
@@ -837,6 +849,7 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                     <View style={{ flexDirection: "row", gap: 8, marginTop: 6 }}>
                       <FocusInput
                         c={c}
+                        touch={mobile}
                         value={newModelId}
                         onChangeText={setNewModelId}
                         placeholder="输入模型 ID 后按回车添加"
@@ -846,7 +859,7 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
                       />
                       <Pressable
                         onPress={() => { if (newModelId.trim()) { setPiModels([...piModels, { id: newModelId.trim(), name: newModelId.trim() }]); setNewModelId(""); } }}
-                        style={({ pressed }) => ({ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, backgroundColor: pressed ? c.accent : c.accent, flexDirection: "row", alignItems: "center", gap: 4 })}
+                        style={({ pressed }) => ({ paddingHorizontal: mobile ? 14 : 10, paddingVertical: mobile ? 9 : 4, borderRadius: 8, backgroundColor: pressed ? c.accent : c.accent, flexDirection: "row", alignItems: "center", gap: 4 })}
                       >
                         <Icon name="Plus" size={11} color={c.accentText} />
                         <Text style={{ color: c.accentText, fontSize: 11, fontWeight: "600" }}>添加</Text>
@@ -863,16 +876,20 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
           {/* Footer */}
           <View style={{ flexDirection: "row", alignItems: "center", padding: 13, borderTopWidth: 1, borderColor: c.border, gap: 10 }}>
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 5 }}>
-              <Icon name="Lightbulb" size={12} color={c.muted} />
-              <Text style={{ fontSize: 11.5, color: c.muted }}>选择预设后，请在下方填写 API Key 等字段</Text>
+              {!mobile && (
+                <>
+                  <Icon name="Lightbulb" size={12} color={c.muted} />
+                  <Text style={{ fontSize: 11.5, color: c.muted }}>选择预设后，请在下方填写 API Key 等字段</Text>
+                </>
+              )}
             </View>
-            <Pressable onPress={onClose} style={({ pressed }) => ({ paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1 })}>
+            <Pressable onPress={onClose} style={({ pressed }) => ({ paddingHorizontal: mobile ? 16 : 11, paddingVertical: mobile ? 11 : 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1 })}>
               <Text style={{ color: c.text, fontSize: 12, fontWeight: "600" }}>取消</Text>
             </Pressable>
             <Pressable
               onPress={handleSubmit}
               disabled={submitting}
-              style={({ pressed }) => ({ paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, backgroundColor: pressed ? c.accent : c.accent, opacity: submitting ? 0.7 : 1, flexDirection: "row", alignItems: "center", gap: 4 })}
+              style={({ pressed }) => ({ paddingHorizontal: mobile ? 16 : 11, paddingVertical: mobile ? 11 : 6, borderRadius: 8, backgroundColor: pressed ? c.accent : c.accent, opacity: submitting ? 0.7 : 1, flexDirection: "row", alignItems: "center", gap: 4 })}
             >
               {submitting ? <Spinner size={12} color={c.accentText} /> : <Icon name={isEdit ? "Save" : "Plus"} size={12} color={c.accentText} />}
               <Text style={{ color: c.accentText, fontSize: 12, fontWeight: "600" }}>
@@ -886,16 +903,17 @@ function AddProviderPanel({ appId, c, editing, onClose, onSaved }: AddPanelProps
   );
 }
 
-function PresetBtn({ label, icon, selected, selectedBg, onPress, c }: { label: string; icon?: React.ReactNode; selected: boolean; selectedBg?: string; onPress: () => void; c: Palette }) {
+function PresetBtn({ label, icon, selected, selectedBg, onPress, c, mobile = false }: { label: string; icon?: React.ReactNode; selected: boolean; selectedBg?: string; onPress: () => void; c: Palette; mobile?: boolean }) {
   const bg = selected ? (selectedBg ?? c.accent) : c.surface1;
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => ({
-        paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
+        paddingHorizontal: 12, paddingVertical: mobile ? 12 : 8, borderRadius: 10,
         borderWidth: 1, borderColor: selected ? (selectedBg ?? c.accent) : c.border,
         backgroundColor: pressed && !selected ? c.surface2 : bg,
-        flexDirection: "row", alignItems: "center", gap: 6, maxWidth: 200,
+        flexDirection: "row", alignItems: "center", gap: 6, maxWidth: mobile ? undefined : 200,
+        ...(mobile ? { width: "100%" as const } : {}),
       })}
     >
       {icon}
@@ -904,9 +922,9 @@ function PresetBtn({ label, icon, selected, selectedBg, onPress, c }: { label: s
   );
 }
 
-function Field({ label, fullWidth, half, children }: { label: string; fullWidth?: boolean; half?: boolean; children: React.ReactNode }) {
+function Field({ label, fullWidth, half, children, mobile = false }: { label: string; fullWidth?: boolean; half?: boolean; children: React.ReactNode; mobile?: boolean }) {
   return (
-    <View style={{ width: fullWidth ? "100%" : (half ? "48%" : "auto"), flexGrow: half ? 0 : 1 }}>
+    <View style={{ width: fullWidth ? "100%" : (half ? (mobile ? "100%" : "48%") : "auto"), flexGrow: half ? 0 : 1 }}>
       <Text style={{ fontSize: 12, fontWeight: "600", color: "#6b7280", marginBottom: 4 }}>{label}</Text>
       {children}
     </View>
@@ -940,6 +958,9 @@ export function ProviderSwitcherSurface({ theme, layout }: PluginSurfaceProps) {
 
   const c = useMemo(() => makePalette(theme, isDark), [theme, isDark]);
   const compact = layout?.compact ?? false;
+  const platform = layout?.platform ?? "web";
+  const touch = platform !== "web";
+  const mobile = touch || compact;
 
   const listRpc   = useRpc(listProviders);
   const switchRpc = useRpc(switchProvider);
@@ -1089,9 +1110,10 @@ export function ProviderSwitcherSurface({ theme, layout }: PluginSurfaceProps) {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
-      {/* Top bar */}
-      <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderColor: c.border, backgroundColor: c.surface0, gap: 10 }}>
-        <View style={{ flexDirection: "row", backgroundColor: c.surface1, borderRadius: 12, padding: 4, gap: 2, marginHorizontal: "auto" }}>
+      {/* Top bar — 移动端分上下两行：app tabs 整行居中，动作按钮第二行 */}
+      <View style={{ borderBottomWidth: 1, borderColor: c.border, backgroundColor: c.surface0 }}>
+      <View style={{ flexDirection: mobile ? "column" : "row", alignItems: mobile ? "stretch" : "center", paddingHorizontal: 16, paddingVertical: 12, gap: 10 }}>
+        <View style={{ flexDirection: "row", backgroundColor: c.surface1, borderRadius: 12, padding: 4, gap: 2, ...(mobile ? { alignSelf: "center" } : { marginHorizontal: "auto" }) }}>
           {apps.map((app) => {
             const active = activeApp === app.id;
             return (
@@ -1099,7 +1121,7 @@ export function ProviderSwitcherSurface({ theme, layout }: PluginSurfaceProps) {
                 key={app.id}
                 onPress={() => { setActiveApp(app.id); setSorting(false); }}
                 style={({ pressed }) => ({
-                  paddingHorizontal: 14, paddingVertical: 6, borderRadius: 9,
+                  paddingHorizontal: touch ? 16 : 14, paddingVertical: touch ? 10 : 6, borderRadius: 9,
                   flexDirection: "row", alignItems: "center", gap: 6,
                   backgroundColor: active ? c.surface0 : (pressed ? c.surface2 : "transparent"),
                 })}
@@ -1110,35 +1132,36 @@ export function ProviderSwitcherSurface({ theme, layout }: PluginSurfaceProps) {
             );
           })}
         </View>
-        <View style={{ flexDirection: "row", gap: 8, marginLeft: "auto", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", gap: 8, marginLeft: mobile ? 0 : "auto", alignItems: "center", justifyContent: mobile ? "center" : "flex-start" }}>
           {sorting ? (
             <>
-              <Pressable onPress={() => exitSort(true)} disabled={savingOrder} style={({ pressed }) => ({ paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, backgroundColor: c.accent, opacity: savingOrder ? 0.7 : 1, flexDirection: "row", alignItems: "center", gap: 4 })}>
+              <Pressable onPress={() => exitSort(true)} disabled={savingOrder} style={({ pressed }) => ({ paddingHorizontal: touch ? 14 : 11, paddingVertical: touch ? 10 : 6, borderRadius: 8, backgroundColor: c.accent, opacity: savingOrder ? 0.7 : 1, flexDirection: "row", alignItems: "center", gap: 4 })}>
                 {savingOrder ? <Spinner size={12} color={c.accentText} /> : <Icon name="Check" size={12} color={c.accentText} />}
                 <Text style={{ color: c.accentText, fontSize: 12, fontWeight: "600" }}>{savingOrder ? "保存中…" : "完成排序"}</Text>
               </Pressable>
-              <Pressable onPress={() => exitSort(false)} style={({ pressed }) => ({ paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1 })}>
+              <Pressable onPress={() => exitSort(false)} style={({ pressed }) => ({ paddingHorizontal: touch ? 14 : 11, paddingVertical: touch ? 10 : 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1 })}>
                 <Text style={{ color: c.text, fontSize: 12, fontWeight: "600" }}>取消</Text>
               </Pressable>
             </>
           ) : (
             <>
               {providers.length > 1 && (
-                <Pressable onPress={enterSort} style={({ pressed }) => ({ paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1, flexDirection: "row", alignItems: "center", gap: 4 })}>
+                <Pressable onPress={enterSort} style={({ pressed }) => ({ paddingHorizontal: touch ? 14 : 11, paddingVertical: touch ? 10 : 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1, flexDirection: "row", alignItems: "center", gap: 4 })}>
                   <Icon name="GripVertical" size={12} color={c.text} />
                   <Text style={{ color: c.text, fontSize: 12, fontWeight: "600" }}>排序</Text>
                 </Pressable>
               )}
-              <Pressable onPress={handleImport} disabled={importing} style={({ pressed }) => ({ paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1, flexDirection: "row", alignItems: "center", gap: 4, opacity: importing ? 0.7 : 1 })}>
+              <Pressable onPress={handleImport} disabled={importing} style={({ pressed }) => ({ paddingHorizontal: touch ? 14 : 11, paddingVertical: touch ? 10 : 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1, flexDirection: "row", alignItems: "center", gap: 4, opacity: importing ? 0.7 : 1 })}>
                 {importing ? <Spinner size={12} /> : <Icon name="FileDown" size={12} color={c.text} />}
                 <Text style={{ color: c.text, fontSize: 12, fontWeight: "600" }}>{importing ? "导入中…" : "导入当前配置"}</Text>
               </Pressable>
-              <Pressable onPress={() => setShowAdd(true)} style={({ pressed }) => ({ width: 36, height: 36, borderRadius: 18, backgroundColor: "#f97316", alignItems: "center", justifyContent: "center", opacity: pressed ? 0.85 : 1 })}>
+              <Pressable onPress={() => setShowAdd(true)} style={({ pressed }) => ({ width: touch ? 44 : 36, height: touch ? 44 : 36, borderRadius: touch ? 22 : 18, backgroundColor: "#f97316", alignItems: "center", justifyContent: "center", opacity: pressed ? 0.85 : 1 })}>
                 <Icon name="Plus" size={18} color="#fff" />
               </Pressable>
             </>
           )}
         </View>
+      </View>
       </View>
 
       {/* Sub tabs */}
@@ -1146,7 +1169,7 @@ export function ProviderSwitcherSurface({ theme, layout }: PluginSurfaceProps) {
         {tabs.map((tab) => {
           const active = activeTab === tab.id;
           return (
-            <Pressable key={tab.id} onPress={() => setActiveTab(tab.id)} style={({ pressed }) => ({ paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 2, borderColor: active ? c.accent : "transparent", opacity: pressed ? 0.7 : 1 })}>
+            <Pressable key={tab.id} onPress={() => setActiveTab(tab.id)} style={({ pressed }) => ({ paddingHorizontal: touch ? 20 : 16, paddingVertical: touch ? 12 : 8, borderBottomWidth: 2, borderColor: active ? c.accent : "transparent", opacity: pressed ? 0.7 : 1 })}>
               <Text style={{ color: active ? c.accent : c.muted, fontSize: 13, fontWeight: active ? "600" : "400" }}>{tab.label}</Text>
             </Pressable>
           );
@@ -1174,16 +1197,16 @@ export function ProviderSwitcherSurface({ theme, layout }: PluginSurfaceProps) {
             )}
 
             {!loading && providers.length === 0 && (
-              <View style={{ alignItems: "center", justifyContent: "center", padding: 60, gap: 12 }}>
+              <View style={{ alignItems: "center", justifyContent: "center", padding: mobile ? 30 : 60, gap: 12 }}>
                 <Icon name="Package" size={32} color={c.muted} />
                 <Text style={{ fontSize: 14, color: c.muted }}>暂无供应商</Text>
                 <Text style={{ fontSize: 12, color: c.muted, textAlign: "center" }}>如果你已有配置，请点击"导入当前配置"，所有数据将安全保存在 default 供应商中</Text>
-                <View style={{ flexDirection: "row", gap: 10, marginTop: 8 }}>
-                  <Pressable onPress={handleImport} disabled={importing} style={({ pressed }) => ({ paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1, flexDirection: "row", alignItems: "center", gap: 4 })}>
+                <View style={{ flexDirection: mobile ? "column" : "row", gap: 10, marginTop: 8, alignItems: "center" }}>
+                  <Pressable onPress={handleImport} disabled={importing} style={({ pressed }) => ({ paddingHorizontal: 14, paddingVertical: touch ? 11 : 6, borderRadius: 8, borderWidth: 1, borderColor: c.border, backgroundColor: pressed ? c.surface2 : c.surface1, flexDirection: "row", alignItems: "center", gap: 4 })}>
                     <Icon name="FileDown" size={12} color={c.text} />
                     <Text style={{ color: c.text, fontSize: 12, fontWeight: "600" }}>导入当前配置</Text>
                   </Pressable>
-                  <Pressable onPress={() => setShowAdd(true)} style={({ pressed }) => ({ paddingHorizontal: 11, paddingVertical: 6, borderRadius: 8, backgroundColor: c.accent, opacity: pressed ? 0.8 : 1, flexDirection: "row", alignItems: "center", gap: 4 })}>
+                  <Pressable onPress={() => setShowAdd(true)} style={({ pressed }) => ({ paddingHorizontal: 14, paddingVertical: touch ? 11 : 6, borderRadius: 8, backgroundColor: c.accent, opacity: pressed ? 0.8 : 1, flexDirection: "row", alignItems: "center", gap: 4 })}>
                     <Icon name="Plus" size={12} color={c.accentText} />
                     <Text style={{ color: c.accentText, fontSize: 12, fontWeight: "600" }}>新建供应商</Text>
                   </Pressable>
@@ -1198,6 +1221,7 @@ export function ProviderSwitcherSurface({ theme, layout }: PluginSurfaceProps) {
                 appId={activeApp}
                 p={c}
                 compact={compact}
+                touch={touch}
                 sorting={sorting}
                 isDragOver={false}
                 onSwitch={() => handleSwitch(prov.id)}
@@ -1225,6 +1249,7 @@ export function ProviderSwitcherSurface({ theme, layout }: PluginSurfaceProps) {
         <AddProviderPanel
           appId={activeApp}
           c={c}
+          mobile={mobile}
           editing={editingProvider}
           onClose={() => { setShowAdd(false); setEditingProvider(null); }}
           onSaved={load}

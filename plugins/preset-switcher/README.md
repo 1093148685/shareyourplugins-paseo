@@ -1,6 +1,6 @@
 # preset-switcher
 
-Paseo 插件：一键以指定**人格 + 技能 + 模型**启动 agent。预设即数据——一个目录一个预设，扫描即注册；zip 预设包可导入导出，换机/分享直接带走。
+Paseo 0.8 插件：一键以指定**人格 + 技能 + 模型**启动 agent。预设即数据——一个目录一个预设，扫描即注册；zip 预设包可导入导出，换机/分享直接带走。（要求 Paseo >= 0.8.0）
 
 ## 快速开始
 
@@ -62,7 +62,7 @@ daemon 会把 `systemPrompt` 映射到各 provider 的原生字段，人格注�
 | opencode | `AGENTS.md` | 无原生机制 |
 | 未知 | 全写（CLAUDE.md + AGENTS.md） | 联接 + pi-settings 双挂 |
 
-新增 provider = 在 `presets-data.ts` 的 `PROVIDER_ADAPTERS` 加一行。
+新增 provider = 在 `server/presets-data.ts` 的 `PROVIDER_ADAPTERS` 加一行。
 
 ## 目录结构
 
@@ -102,18 +102,19 @@ export PRESET_SWITCHER_SKILLS=/opt/dsh-skills  # 指向技能库
 
 目标机需自行配好对应 provider（`paseo provider ls` 查看）。
 
-## 文件说明
+## 文件说明（Paseo >= 0.8 架构）
 
 | 文件 | 作用 |
 |---|---|
-| `presets-data.ts` | 路径解析、adapter 表、manifest schema、动态扫描注册（node-free，双端安全） |
-| `seed-data.ts` | 内置预设内容（纯数据） |
-| `preset-pack.ts` | zip 导入/导出/删除/种子安装（仅 daemon/CLI） |
-| `preset-backend.ts` | 物化目录（adapter 驱动） |
-| `zip.ts` | 零依赖 zip 读写（store 格式写出，deflate/store 读入） |
-| `contracts.ts` | RPC 契约（zod） |
-| `index.ts` | 插件入口 |
-| `main.client.tsx` | 面板 UI |
+| `server/presets-data.ts` | 路径解析、adapter 表、manifest schema、动态扫描注册（node-free，双端安全） |
+| `server/seed-data.ts` | 内置预设内容（纯数据） |
+| `server/preset-pack.ts` | zip 导入/导出/删除/种子安装（仅 daemon/CLI） |
+| `server/preset-backend.ts` | 物化目录（adapter 驱动） |
+| `server/zip.ts` | 零依赖 zip 读写（store 格式写出，deflate/store 读入） |
+| `shared/contracts.ts` | RPC 契约（zod） |
+| `index.server.ts` | daemon 端入口（RPC handler） |
+| `index.client.tsx` | 客户端入口（surface + sidebar） |
+| `client/Surface.tsx` | 面板 UI |
 | `preset.mjs` | CLI 入口 |
 
 修改代码后：`paseo plugin reload preset-switcher`。**只导入/删除预设不需要 reload**——注册表是扫描出来的。

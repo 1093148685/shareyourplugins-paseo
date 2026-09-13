@@ -1,9 +1,9 @@
-// Shared RPC contracts. Imported by BOTH the backend entry (index.ts) and the
-// client surface (main.client.tsx). Node-free: only zod + @getpaseo/plugin/server,
+// Shared RPC contracts. Imported by BOTH the server entry (index.server.ts) and
+// the client surface (client/Surface.tsx). Node-free: only zod + @getpaseo/plugin,
 // both of which Paseo provides to client bundles.
 // RPC names must match /^[a-z][a-z0-9._-]*$/ (lowercase only).
 
-import { defineRpc } from "@getpaseo/plugin/server";
+import { defineRpc } from "@getpaseo/plugin";
 import { z } from "zod";
 
 export const presetShape = z.object({

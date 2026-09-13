@@ -38,10 +38,10 @@ const {
   scanPresets,
   skillStatus,
   skillsDir,
-} = await import("./presets-data.ts");
-const { SEED_IDS } = await import("./seed-data.ts");
+} = await import("./server/presets-data.ts");
+const { SEED_IDS } = await import("./server/seed-data.ts");
 const { ensureSeedPresets, importPresetPack, exportPresetPack, removePresetDir } =
-  await import("./preset-pack.ts");
+  await import("./server/preset-pack.ts");
 
 const { existsSync, mkdirSync, readlinkSync, rmSync, symlinkSync, writeFileSync } =
   await import("node:fs");

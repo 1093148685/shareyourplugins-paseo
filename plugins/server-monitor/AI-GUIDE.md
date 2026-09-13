@@ -57,7 +57,7 @@ node manage.mjs path              # 打印数据目录
 ### 加密（encPassword）
 
 AES-256-GCM，密钥在同目录 `.enc-key`（hex 编码 32 字节，不存在则生成）。
-格式：`iv_hex:authTag_hex:ciphertext_hex`（iv 12 字节随机）。参考 `monitor-backend.ts` 的 `encryptSecret`。
+格式：`iv_hex:authTag_hex:ciphertext_hex`（iv 12 字节随机）。参考 `server/monitor-backend.ts` 的 `encryptSecret`。
 
 ## 常见任务配方
 
@@ -74,10 +74,10 @@ AES-256-GCM，密钥在同目录 `.enc-key`（hex 编码 32 字节，不存在�
 | 文件 | 作用 |
 |---|---|
 | `manage.mjs` | 本 CLI（你主要用这个） |
-| `monitor-backend.ts` | 插件后端（SSH 采集、加密），由 daemon 加载 |
-| `main.client.tsx` | UI，React Native |
-| `contracts.ts` | RPC 契约 |
-| `index.ts` | 插件入口 |
+| `server/monitor-backend.ts` | 插件后端（SSH 采集、加密），由 daemon 加载 |
+| `client/Surface.tsx` | UI，React Native |
+| `shared/contracts.ts` | RPC 契约 |
+| `index.server.ts` / `index.client.tsx` | 插件入口（Paseo >= 0.8 双入口） |
 
 修改插件代码后需要 `paseo plugin reload server-monitor`。
 **只加服务器不需要 reload**——manage.mjs 直接写数据文件。

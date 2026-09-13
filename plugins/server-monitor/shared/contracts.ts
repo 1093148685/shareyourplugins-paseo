@@ -1,4 +1,4 @@
-import { defineRpc } from "@getpaseo/plugin/server";
+import { defineRpc } from "@getpaseo/plugin";
 import { z } from "zod";
 
 // ── Shared shapes ──────────────────────────────────────────────────────────────
@@ -163,6 +163,8 @@ export const getSelfStats = defineRpc({
     sshActive: z.number(),
     sshAvgMs: z.number(),
     sshLastMs: z.number(),
+    muxHits: z.number(),       // polls served via an existing mux/share channel
+    skipped: z.number(),       // polls suppressed by offline backoff
     servers: z.number(),
     cacheEntries: z.number(),
   }),

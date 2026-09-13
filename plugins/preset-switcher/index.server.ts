@@ -1,4 +1,15 @@
-import type { PluginContext } from "@getpaseo/plugin";
+/**
+ * index.server.ts — Plugin server entry for preset-switcher.
+ *
+ * Registers the RPC handlers that bridge the client UI to the Node-only
+ * preset backend (filesystem, zip, paseo agent API). UI registration lives
+ * in index.client.tsx — Paseo >= 0.8 splits the two entry points.
+ *
+ * ── Entry: NO top-level Node usage ─────────────────────────────────────────
+ * All filesystem / process work lives in ./server/* and is pulled in with a
+ * dynamic import() INSIDE the handlers, which only ever run on the daemon.
+ */
+import type { PluginServerContext } from "@getpaseo/plugin/server";
 import {
   createAgentWithPreset,
   exportPreset,
@@ -7,32 +18,21 @@ import {
   previewPreset,
   removePreset,
   repairPreset,
-} from "./contracts";
-import { MainSurface } from "./main.client";
-
-// ── Entry: NO top-level Node usage ───────────────────────────────────────────
-// This module is bundled for BOTH the daemon (backend) and the Paseo renderer
-// (client), because addSurface() registers a client component from here. The
-// renderer stubs Node builtins, so any top-level fs/path call would throw at
-// bundle-eval time.
-//
-// Therefore: all filesystem / process work lives in ./preset-backend and is
-// pulled in with a dynamic import() INSIDE the handlers, which only ever run
-// on the daemon. The client bundle never evaluates Node code.
+} from "./shared/contracts";
 
 async function backend() {
-  return import("./preset-backend");
+  return import("./server/preset-backend");
 }
 
 async function pack() {
-  return import("./preset-pack");
+  return import("./server/preset-pack");
 }
 
-export default function contribute(plugin: PluginContext) {
-  plugin.handle(listPresets, async () => {
+export default function contribute(server: PluginServerContext) {
+  server.handle(listPresets, async () => {
     const be = await backend();
     const { presets, errors } = be.listAllPresets();
-    const { skillStatus, renderPersona, skillsDir } = await import("./presets-data");
+    const { skillStatus, renderPersona, skillsDir } = await import("./server/presets-data");
     return {
       presets: presets.map((p) => {
         const st = skillStatus(p);
@@ -57,9 +57,9 @@ export default function contribute(plugin: PluginContext) {
     };
   });
 
-  plugin.handle(previewPreset, async ({ presetId }) => {
+  server.handle(previewPreset, async ({ presetId }) => {
     const be = await backend();
-    const { renderPersona } = await import("./presets-data");
+    const { renderPersona } = await import("./server/presets-data");
     const preset = be.findPreset(presetId);
     if (!preset) throw new Error(`Unknown preset: ${presetId}`);
     const dir = be.ensurePresetDir(preset);
@@ -74,7 +74,7 @@ export default function contribute(plugin: PluginContext) {
     };
   });
 
-  plugin.handle(repairPreset, async ({ presetId }) => {
+  server.handle(repairPreset, async ({ presetId }) => {
     const be = await backend();
     const all = be.listAllPresets().presets;
     const targets = presetId ? all.filter((p) => p.id === presetId) : all;
@@ -93,12 +93,12 @@ export default function contribute(plugin: PluginContext) {
     };
   });
 
-  plugin.handle(importPreset, async ({ zipPath }) => {
+  server.handle(importPreset, async ({ zipPath }) => {
     const pk = await pack();
     return pk.importPresetPack(zipPath);
   });
 
-  plugin.handle(exportPreset, async ({ presetId, destPath }) => {
+  server.handle(exportPreset, async ({ presetId, destPath }) => {
     const be = await backend();
     const pk = await pack();
     const preset = be.findPreset(presetId);
@@ -106,15 +106,15 @@ export default function contribute(plugin: PluginContext) {
     return pk.exportPresetPack(preset, destPath);
   });
 
-  plugin.handle(removePreset, async ({ presetId }) => {
+  server.handle(removePreset, async ({ presetId }) => {
     const pk = await pack();
     pk.removePresetDir(presetId);
     return { ok: true };
   });
 
-  plugin.handle(createAgentWithPreset, async ({ presetId, prompt, cwdOverride }, { paseo }) => {
+  server.handle(createAgentWithPreset, async ({ presetId, prompt, cwdOverride }, { paseo }) => {
     const be = await backend();
-    const { renderPersona } = await import("./presets-data");
+    const { renderPersona } = await import("./server/presets-data");
     const preset = be.findPreset(presetId);
     if (!preset) throw new Error(`Unknown preset: ${presetId}`);
 
@@ -160,14 +160,6 @@ export default function contribute(plugin: PluginContext) {
       personaChars: persona.length,
       skillsMounted: dir.skillsMounted,
     };
-  });
-
-  plugin.addSurface("main", MainSurface);
-  plugin.addSidebarItem({
-    id: "preset-switcher",
-    title: "预设切换",
-    icon: "Layers",
-    surface: "main",
   });
 
   return () => {};
